@@ -1,0 +1,11 @@
+<?php
+
+return [
+    'consumer_key' => '',
+    'consumer_secret' => '',
+    'access_token' => '',
+    'access_token_secret' => '',
+    'screen_name' => '',
+    'list_name' => '',
+    'days' => 30,
+];
