@@ -102,7 +102,7 @@ class DefaultCommand extends Command
     {
         $lists = $client->get(
             'lists/list',
-            [ 'user_id' => $config['user_id'] ]
+            [ 'screen_name' => $config['screen_name'] ]
         );
         $lists = array_filter($lists, function ($list) use ($config) {
             return $list->name === $config['list_name'];
