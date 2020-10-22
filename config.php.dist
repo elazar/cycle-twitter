@@ -8,4 +8,5 @@ return [
     'screen_name' => '',
     'list_name' => '',
     'days' => 30,
+    'exclude_users' => [],
 ];

@@ -29,7 +29,7 @@ class DefaultCommand extends Command
 
         $client = $this->getClient($config);
 
-        $userId = $this->getUserId($config, $client);
+        $userId = $this->getUserId($config['screen_name'], $client);
         if (!$userId) {
             $output->writeln('<error>User not found: ' . $config['screen_name'] . '</error>');
             return 1;
@@ -86,11 +86,11 @@ class DefaultCommand extends Command
         );
     }
 
-    private function getUserId(array $config, TwitterOAuth $client)
+    private function getUserId($screenName, TwitterOAuth $client)
     {
         $user = $client->get(
             'users/show',
-            [ 'screen_name' => $config['screen_name'] ]
+            [ 'screen_name' => $screenName ]
         );
         if ($user) {
             return $user->id;
@@ -124,6 +124,7 @@ class DefaultCommand extends Command
         $rawStatuses = [];
         $finished = false;
         $days = $config['days'] ?? 30;
+        $excludeUsers = isset($config['exclude_users']) ? (array) $config['exclude_users'] : [];
         $cutoffDate = strtotime("$days days ago");
         $maxId = 0;
         $conditions = [
@@ -219,6 +220,26 @@ class DefaultCommand extends Command
 
         $newUsers = array_unique($newUsers);
         $output->writeln('Found interactions with <info>' . count($newUsers) . '</info> unique users');
+
+        if (!empty($excludeUsers)) {
+            $output->writeln('Getting <info>' . count($excludeUsers) . '</info> users to exclude');
+
+            $excludeUserIds = [];
+            foreach ($excludeUsers as $username) {
+                $userId = $this->getUserId($username, $client);
+                if ($userId !== null) {
+                    $excludeUserIds[] = $userId;
+                } else {
+                    $output->writeln('<comment>Unable to find user to exclude: ' . $username . '</comment>');
+                }
+            }
+
+            $foundUsers = array_intersect($excludeUserIds, $newUsers);
+            if (!empty($foundUsers)) {
+                $newUsers = array_diff($newUsers, $excludeUserIds);
+                $output->writeln('Removed <info>' . count($excludeUserIds) . '</info> excluded users, <info>' . count($newUsers) . '</info> users remaining');
+            }
+        }
 
         $output->writeln('Getting current users in list');
         $members = $client->get(
