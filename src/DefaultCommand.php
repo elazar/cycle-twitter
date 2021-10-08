@@ -110,7 +110,7 @@ class DefaultCommand extends Command
         if (empty($lists)) {
             return null;
         }
-        return $lists[0]->id;
+        return array_shift($lists)->id;
     }
 
     private function updateList(
